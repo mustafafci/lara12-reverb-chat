@@ -6,7 +6,6 @@ Broadcast::channel('chat.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
 });
 
-Broadcast::channel('typing.{userId}', function ($user, $userId) {
-    // return (int) $user->id === (int) $userId;
-    return true;
+Broadcast::channel('typing.{receiverId}', function ($user, $receiverId) {
+    return (int) $user->id !== (int) $receiverId;
 });
