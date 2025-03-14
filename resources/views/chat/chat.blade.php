@@ -6,8 +6,16 @@
         <div id="chat-box" class="chat-box">
             @foreach ($messages as $message)
                 <div class="message {{ $message->sender_id == auth()->id() ? 'sent' : 'received' }}">
-                    <div class="message-content">
-                        {{ $message->message }}
+                    <div class="user-initial">
+                        {{ strtoupper(substr($message->sender?->name, 0, 1)) }}
+                    </div>
+                    <div class="message-wrapper">
+                        <div class="message-content">
+                            {{ $message->message }}
+                        </div>
+                        <div class="message-time">
+                            {{ $message->created_at->format('h:i a') }}
+                        </div>
                     </div>
                 </div>
             @endforeach
@@ -28,6 +36,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             let receiverId = {{ $receiver->id }};
             let senderId = {{ auth()->id() }};
+            let senderName = '{{ auth()->user()->name }}';
+            let receiverName = '{{ $receiver->name }}';
             let chatBox = document.getElementById('chat-box');
             let messageForm = document.getElementById('message-form');
             let messageInput = document.getElementById('message-input');
@@ -60,7 +70,13 @@
                 .listen('MessageSent', (e) => {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = 'message received';
-                    messageDiv.innerHTML = `<div class="message-content">${e.message.message}</div>`;
+                    messageDiv.innerHTML = `
+                        <div class="user-initial">${receiverName.charAt(0).toUpperCase()}</div>
+                        <div class="message-wrapper">
+                            <div class="message-content">${e.message.message}</div>
+                            <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                    `;
                     chatBox.appendChild(messageDiv);
                     scrollToBottom();
                 });
@@ -93,7 +109,13 @@
                     }).then(() => {
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'message sent';
-                        messageDiv.innerHTML = `<div class="message-content">${message}</div>`;
+                        messageDiv.innerHTML = `
+                            <div class="user-initial">${senderName.charAt(0).toUpperCase()}</div>
+                            <div class="message-wrapper">
+                                <div class="message-content">${message}</div>
+                                <div class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                            </div>
+                        `;
                         chatBox.appendChild(messageDiv);
                         scrollToBottom();
                         messageInput.value = '';
